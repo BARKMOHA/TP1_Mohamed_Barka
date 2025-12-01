@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'language_id'
     ];
 
     /**
@@ -46,6 +47,10 @@ class User extends Authenticatable
         ];
     }
 
+    public function language()
+    {
+        return $this->belongsTo(Language::class);
+    }
     public function critics()
     {
         return $this->hasMany(Critic::class);

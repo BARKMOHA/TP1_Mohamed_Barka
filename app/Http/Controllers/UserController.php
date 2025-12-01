@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Http\Controllers;
+use App\Models\User;
+use App\Models\Language;
+use App\Http\Resources\LanguageResource;
+
+use Illuminate\Support\Facades\Hash;
+use App\Http\Resources\UserResource;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+
+class UserController extends Controller
+{
+    /**
+     *  Créer un utilisateur
+     */
+    public function store(Request $request)
+    {
+        // Validation complète
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|email|unique:users,email',
+            'password'    => 'required|string|min:6',
+            'language_id' => 'required|exists:languages,id',
+        ]);
+
+        // Création
+        $user = User::create([
+            'name'        => $validated['name'],
+            'email'       => $validated['email'],
+            'password'    => Hash::make($validated['password']),
+            'language_id' => $validated['language_id'],
+        ]);
+
+        return (new UserResource($user))
+            ->response()
+            ->setStatusCode(201);   
+    }
+     /**
+     *  Mettre à jour un utilisateur 
+     */
+    public function update(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'])
+                ->setStatusCode(404);
+        }
+
+        // Validation 
+        $validated = $request->validate([
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|email|unique:users,email,' . $id,
+            'password'    => 'required|string|min:6',
+            'language_id' => 'required|exists:languages,id',
+        ]);
+
+        // Mise à jour
+        $user->update([
+            'name'        => $validated['name'],
+            'email'       => $validated['email'],
+            'password'    => Hash::make($validated['password']),
+            'language_id' => $validated['language_id'],
+        ]);
+
+        return (new UserResource($user))
+            ->response()
+            ->setStatusCode(200);   
+    }
+
+
+    public function language($id)
+    {
+        // Charger l'utilisateur avec toutes ses critiques + films liés
+        $user = User::with('critics.film')->find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found'
+            ])->setStatusCode(404);
+        }
+
+        // Si l'utilisateur n'a fait aucune critique
+        if ($user->critics->isEmpty()) {
+            return response()->json([
+                'message' => 'User has no critics, no preferred language'
+            ])->setStatusCode(200);
+        }
+
+        // Compter les langages utilisés dans ses critiques
+
+        $langCounts = $user->critics    //https://laravel.com/docs/12.x/collections#method-pluck
+            ->pluck('film.language_id')  // extraire tous les language_id 
+            ->countBy();                 // compter les occurrences
+            
+            
+        
+        
+            // Récupérer le langage ID le plus fréquent
+        $preferredLanguageId = $langCounts->sortDesc()->keys()->first();
+
+        // Charger la ressource du langage
+        $language = \App\Models\Language::find($preferredLanguageId);
+
+        return (new \App\Http\Resources\LanguageResource($language))
+            ->response()
+            ->setStatusCode(200);
+    }
+}
