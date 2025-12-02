@@ -8,8 +8,21 @@ use Illuminate\Http\Request;
 class CriticController extends Controller
 {
     /**
-     *  Supprimer une critique
-     */
+     * @OA\Delete(
+     *     path="/api/critics/{id}",
+     *     summary="Supprimer une critique",
+     *     tags={"Critics"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Critique supprimée"),
+     *     @OA\Response(response=404, description="Critique introuvable")
+     * )
+    */
+
     public function destroy($id)
     {
         $critic = Critic::find($id);

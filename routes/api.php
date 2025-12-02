@@ -7,36 +7,23 @@ use App\Http\Controllers\CriticController;
 use App\Http\Controllers\UserController;
 
 
-// Route::get('/films', [FilmController::class, 'index']);
-// Route::get('/films/{id}', [FilmController::class, 'show']);
-// Route::get('/films/{id}/actors', [FilmController::class, 'actors']);
-// Route::get('/films/{id}/critics', [FilmController::class, 'critics']);
 
-// Route::get('/actors', [ActorController::class, 'index']);
-// Route::get('/actors/{id}', [ActorController::class, 'show']);
-// Route::get('/actors/{id}/films', [ActorController::class, 'films']);
+// FILMS 
 
-// Route::post('/critics', [CriticController::class, 'store']);
-// Route::get('/critics/{id}', [CriticController::class, 'show']);
-
-// Route::get('/users/{id}/language', [UserController::class, 'language']);
-
-//// FILMS ////
-
-Route::get('/films', [FilmController::class, 'index']);                           // #1
-Route::get('/films/{id}/actors', [FilmController::class, 'actors']);              // #2
-Route::get('/films/{id}/critics', [FilmController::class, 'critics']);            // #3
-Route::get('/films/{id}/average-score', [FilmController::class, 'averageScore']); // #7
-Route::get('/films/search', [FilmController::class, 'search']);                   // #9
+Route::get('/films', [FilmController::class, 'index']);                           
+Route::get('/films/{id}/actors', [FilmController::class, 'actors']);              
+Route::get('/films/{id}/critics', [FilmController::class, 'critics']);            
+Route::get('/films/{id}/average-score', [FilmController::class, 'averageScore']); 
+Route::get('/films/search', [FilmController::class, 'search']);                   
 
 
-//// USERS ////
+// USERS 
 
-Route::post('/users', [UserController::class, 'store']);               // #4
-Route::put('/users/{id}', [UserController::class, 'update']);          // #5
-Route::get('/users/{id}/language', [UserController::class, 'language']); // #8
+Route::post('/users', [UserController::class, 'store']);               
+Route::put('/users/{id}', [UserController::class, 'update']);          
+Route::get('/users/{id}/language', [UserController::class, 'language']); 
 
 
-//// CRITICS ////
+// CRITICS 
 
-Route::delete('/critics/{id}', [CriticController::class, 'destroy']);  // #6
+Route::delete('/critics/{id}', [CriticController::class, 'destroy']);  

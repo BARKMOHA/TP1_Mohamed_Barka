@@ -14,8 +14,26 @@ use Illuminate\Validation\ValidationException;
 class UserController extends Controller
 {
     /**
-     *  Créer un utilisateur
-     */
+     * @OA\Post(
+     *     path="/api/users",
+     *     summary="Créer un utilisateur",
+     *     tags={"Users"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password","language_id"},
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="password", type="string"),
+     *             @OA\Property(property="language_id", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Utilisateur créé"),
+     *     @OA\Response(response=422, description="Erreur de validation")
+     * )
+    */
+
+    
     public function store(Request $request)
     {
         // Validation complète
@@ -38,9 +56,34 @@ class UserController extends Controller
             ->response()
             ->setStatusCode(201);   
     }
-     /**
-     *  Mettre à jour un utilisateur 
-     */
+    
+    /**
+     * @OA\Put(
+     *     path="/api/users/{id}",
+     *     summary="Mettre à jour un utilisateur",
+     *     tags={"Users"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password","language_id"},
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string"),
+     *             @OA\Property(property="language_id", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Utilisateur mis à jour"),
+     *     @OA\Response(response=404, description="Utilisateur introuvable"),
+     *     @OA\Response(response=422, description="Erreur de validation")
+     * )
+    */
+
     public function update(Request $request, $id)
     {
         $user = User::find($id);
@@ -70,6 +113,44 @@ class UserController extends Controller
             ->response()
             ->setStatusCode(200);   
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/users/{id}/language",
+     *     summary="Recevoir le langage préféré d’un utilisateur",
+     *     tags={"Users"},
+     *     description="Détermine le langage préféré d’un utilisateur basé sur les films qu'il a critiqués. En cas d’égalité, retourne celui qui apparaît en premier.",
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de l'utilisateur",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Langage préféré détecté ou message si aucune critique",
+     *         @OA\JsonContent(
+     *             oneOf={
+     *                 @OA\Schema(
+     *                     @OA\Property(property="id", type="integer"),
+     *                     @OA\Property(property="name", type="string")
+     *                 ),
+     *                 @OA\Schema(
+     *                     @OA\Property(property="message", type="string")
+     *                 )
+     *             }
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Utilisateur introuvable"
+     *     )
+     * )
+    */
 
 
     public function language($id)

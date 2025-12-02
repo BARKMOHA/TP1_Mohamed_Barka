@@ -10,9 +10,17 @@ use App\Http\Resources\CriticResource;
 class FilmController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    
+     * @OA\Get(
+     *     path="/api/films",
+     *     summary="Liste paginée des films",
+     *     tags={"Films"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste paginée des films",
+     *     )
+     * )
+    */
+
     public function index()
     {
         $films = Film::paginate(20);
@@ -26,7 +34,23 @@ class FilmController extends Controller
     {
        //
     }
-    
+    /**
+     * @OA\Get(
+     *     path="/api/films/{id}/actors",
+     *     summary="Acteurs d’un film",
+     *     tags={"Films"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID du film",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Liste des acteurs"),
+     *     @OA\Response(response=404, description="Film introuvable")
+     * )
+    */
+
     public function actors($id)
     {
         $film = Film::with('actors')->find($id);
@@ -41,6 +65,23 @@ class FilmController extends Controller
             ->setStatusCode(200);
     }
     
+    /**
+     * @OA\Get(
+     *     path="/api/films/{id}/critics",
+     *     summary="Critiques d’un film",
+     *     tags={"Films"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID du film",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Liste des critiques"),
+     *     @OA\Response(response=404, description="Film introuvable")
+     * )
+    */
+
     public function critics($id)
     {
         $film = Film::with('critics')->find($id);
@@ -56,8 +97,31 @@ class FilmController extends Controller
     }
     
     /**
-     *  Moyenne des scores d’un film
-     */
+     * @OA\Get(
+     *     path="/api/films/{id}/average-score",
+     *     summary="Recevoir la moyenne des critiques d’un film",
+     *     tags={"Films"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID du film pour lequel on veut la moyenne",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Moyenne des critiques",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="film_id", type="integer"),
+     *             @OA\Property(property="average_score", type="number", format="float")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Film introuvable"
+     *     )
+     * )
+    */
     public function averageScore($id)
     {
         $film = Film::with('critics')->find($id);
@@ -78,13 +142,48 @@ class FilmController extends Controller
             ->setStatusCode(200);
     }
 
+
     /**
-     *  Recherche de films
-     * https://laravel.com/docs/12.x/scout#searching
-     */
+     * @OA\Get(
+     *     path="/api/films/search",
+     *     summary="Rechercher des films",
+     *     tags={"Films"},
+     *     @OA\Parameter(
+     *         name="keyword",
+     *         in="query",
+     *         required=false,
+     *         description="Mot-clé dans le titre",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="rating",
+     *         in="query",
+     *         required=false,
+     *         description="Filtrer par rating exact",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="minLength",
+     *         in="query",
+     *         required=false,
+     *         description="Durée minimum",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="maxLength",
+     *         in="query",
+     *         required=false,
+     *         description="Durée maximum",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Résultats de la recherche")
+     * )
+    */
+
+
     public function search(Request $request)
     {
-        $query = Film::query();
+        $query = Film::query(); //https://laravel.com/docs/12.x/scout#searching
 
         // par titre
         if ($request->filled('keyword')) {
